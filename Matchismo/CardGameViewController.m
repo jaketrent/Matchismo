@@ -27,12 +27,14 @@
 
 - (IBAction)flipCard:(UIButton *)sender {
     sender.selected = !sender.isSelected;
-    Card* randomCard = [self.deck drawRandomCard];
-    if (!randomCard) {
-        self.flipsLabel.text = @"Deck depleted!";
-    } else {
-        [sender setTitle:[randomCard contents] forState:UIControlStateSelected];
-        self.flipCount++;
+    if (sender.isSelected) {
+        Card* randomCard = [self.deck drawRandomCard];
+        if (!randomCard) {
+            self.flipsLabel.text = @"Deck depleted!";
+        } else {
+            [sender setTitle:[randomCard contents] forState:UIControlStateSelected];
+            self.flipCount++;
+        }
     }
 }
 
