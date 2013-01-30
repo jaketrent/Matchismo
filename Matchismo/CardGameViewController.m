@@ -8,6 +8,7 @@
 
 #import "CardGameViewController.h"
 #import "Deck.h"
+#import "Card.h"
 #import "PlayingCardDeck.h"
 
 @interface CardGameViewController ()
@@ -26,8 +27,13 @@
 
 - (IBAction)flipCard:(UIButton *)sender {
     sender.selected = !sender.isSelected;
-    [sender setTitle:[[self.deck drawRandomCard] contents] forState:UIControlStateSelected];
-    self.flipCount++;
+    Card* randomCard = [self.deck drawRandomCard];
+    if (!randomCard) {
+        self.flipsLabel.text = @"Deck depleted!";
+    } else {
+        [sender setTitle:[randomCard contents] forState:UIControlStateSelected];
+        self.flipCount++;
+    }
 }
 
 - (Deck*)deck {
