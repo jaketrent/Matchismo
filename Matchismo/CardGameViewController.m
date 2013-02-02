@@ -7,17 +7,24 @@
 //
 
 #import "CardGameViewController.h"
-#import "Deck.h"
 #import "Card.h"
 #import "PlayingCardDeck.h"
+#import "CardMatchingGame.h"
 
 @interface CardGameViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *flipsLabel;
+@property (weak, nonatomic) IBOutlet UILabel *scoreLabel;
 @property (nonatomic) int flipCount;
-@property (nonatomic) Deck* deck;
+@property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *cardButtons;
+@property (nonatomic) CardMatchingGame* game;
 @end
 
 @implementation CardGameViewController
+
+- (CardMatchingGame*)game {
+    if (!_game) _game = [[CardMatchingGame alloc] initWithCardCount:self.cardButtons.count usingDeck:[[PlayingCardDeck alloc] init]];
+    return _game;
+}
 
 - (void)setFlipCount:(int)flipCount {
     _flipCount = flipCount;
@@ -26,23 +33,27 @@
 }
 
 - (IBAction)flipCard:(UIButton *)sender {
-    sender.selected = !sender.isSelected;
+    [self.game flipCardAtIndex:[self.cardButtons indexOfObject:sender]];
     if (sender.isSelected) {
-        Card* randomCard = [self.deck drawRandomCard];
-        if (!randomCard) {
-            self.flipsLabel.text = @"Deck depleted!";
-        } else {
-            [sender setTitle:[randomCard contents] forState:UIControlStateSelected];
-            self.flipCount++;
-        }
+        self.flipCount++;
     }
+    [self updateUI];
 }
 
-- (Deck*)deck {
-    if (!_deck) _deck = [[PlayingCardDeck alloc] init];
-    return _deck;
+- (void)setCardButtons:(NSArray *)cardButtons {
+    _cardButtons = cardButtons;
 }
 
-
+- (void)updateUI {
+    for (UIButton* cardButton in self.cardButtons) {
+        Card* card = [self.game cardAtIndex:[self.cardButtons indexOfObject:cardButton]];
+        [cardButton setTitle:card.contents forState:UIControlStateSelected];
+        [cardButton setTitle:card.contents forState:UIControlStateSelected|UIControlStateDisabled];
+        cardButton.selected = card.isFaceUp;
+        cardButton.enabled = !card.isUnplayable;
+        cardButton.alpha = card.isUnplayable ? 0.3 : 1.0;
+    }
+    self.scoreLabel.text = [NSString stringWithFormat:@"Score: %d", self.game.score];
+}
 
 @end
